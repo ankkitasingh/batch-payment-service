@@ -2,7 +2,7 @@ package com.spring.batch.kafka.producer;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 
 import com.spring.batch.kafka.model.PaymentCommand;
 
@@ -15,12 +15,13 @@ public class PaymentProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    @Transactional
+    
     public void send(PaymentCommand command) {
-        kafkaTemplate.executeInTransaction(kt -> {
-            kt.send("payment-commands", command.paymentId(), command);
-            return true;
-        });
+        kafkaTemplate.send(
+            "payment-commands",
+            command.paymentId(),
+            command
+        );
     }
 }
 

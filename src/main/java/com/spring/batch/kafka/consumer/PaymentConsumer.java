@@ -6,6 +6,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
+
 import com.spring.batch.kafka.model.PaymentCommand;
 import com.spring.batch.kafka.service.PaymentProcessingService;
 
@@ -22,6 +23,8 @@ public class PaymentConsumer {
         topics = "payment-commands",
         containerFactory = "batchFactory"
     )
+    
+   
     public void consume(List<PaymentCommand> batch,
                         Acknowledgment ack) {
 
