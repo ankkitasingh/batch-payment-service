@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -euo pipefail
 
 CERT_DIR=/tmp/kafka-certs
 mkdir -p "$CERT_DIR"
@@ -60,3 +60,8 @@ openssl pkcs12 -export \
   -passout pass:"$KAFKA_KEYSTORE_PASSWORD"
 
 chmod 600 "$CERT_DIR"/*
+
+
+echo "Kafka certs generated:"
+ls -l /tmp/kafka-certs
+
