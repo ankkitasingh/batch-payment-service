@@ -69,7 +69,7 @@ jobs:
         run: |
           if [ "$ENV" = "dev" ]; then
             echo "REPLICAS=1" >> $GITHUB_ENV
-            echo "KAFKA_BOOTSTRAP_SERVERS=dev-aiven:9092" >> $GITHUB_ENV
+            echo "KAFKA_BOOTSTRAP_SERVERS=a-pring-kafka-ankkitasingh32-739e.c.aivencloud.com:21451" >> $GITHUB_ENV
           elif [ "$ENV" = "uat" ]; then
             echo "REPLICAS=2" >> $GITHUB_ENV
             echo "KAFKA_BOOTSTRAP_SERVERS=uat-aiven:9092" >> $GITHUB_ENV
@@ -93,7 +93,7 @@ jobs:
       #  Deploy
       - name: Deploy to EKS
         run: |
-          envsubst < k8s/$ENV/deployment.yaml | kubectl apply -f -
+          envsubst < kubernetes/$ENV/deployment.yaml | kubectl apply -f -
 
       #  Verify rollout
       - name: Verify rollout
