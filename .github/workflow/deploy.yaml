@@ -1,0 +1,101 @@
+name: Build Push Deploy to EKS
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - dev
+          - uat
+          - prod
+
+  push:
+    branches: [ "main" ]
+
+env:
+  AWS_REGION: ap-southeast-2
+  ECR_REPOSITORY: batch-kafka-service
+  EKS_CLUSTER_NAME: payment-cluster
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      #  Resolve environment
+      - name: Resolve environment
+        id: env
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ENV=${{ inputs.environment }}
+          else
+            ENV=dev
+          fi
+          echo "ENV=$ENV" >> $GITHUB_ENV
+
+      #  Configure AWS
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      #  Login to ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      #  Build and push image
+      - name: Build and push image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          IMAGE_URI=$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+          docker build -t $IMAGE_URI .
+          docker push $IMAGE_URI
+
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
+      #  Set environment-specific values
+      - name: Set env values
+        run: |
+          if [ "$ENV" = "dev" ]; then
+            echo "REPLICAS=1" >> $GITHUB_ENV
+            echo "KAFKA_BOOTSTRAP_SERVERS=dev-aiven:9092" >> $GITHUB_ENV
+          elif [ "$ENV" = "uat" ]; then
+            echo "REPLICAS=2" >> $GITHUB_ENV
+            echo "KAFKA_BOOTSTRAP_SERVERS=uat-aiven:9092" >> $GITHUB_ENV
+          else
+            echo "REPLICAS=3" >> $GITHUB_ENV
+            echo "KAFKA_BOOTSTRAP_SERVERS=prod-aiven:9092" >> $GITHUB_ENV
+          fi
+
+      #  Update kubeconfig
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region $AWS_REGION \
+            --name $EKS_CLUSTER_NAME
+
+      #  Ensure namespace exists
+      - name: Ensure namespace
+        run: |
+          kubectl get ns $ENV || kubectl create ns $ENV
+
+      #  Deploy
+      - name: Deploy to EKS
+        run: |
+          envsubst < k8s/$ENV/deployment.yaml | kubectl apply -f -
+
+      #  Verify rollout
+      - name: Verify rollout
+        run: |
+          kubectl rollout status deployment/batch-kafka-service -n $ENV
