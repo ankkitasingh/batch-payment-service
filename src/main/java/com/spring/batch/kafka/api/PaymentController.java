@@ -19,7 +19,7 @@ public class PaymentController {
         this.producer = producer;
     }
 
-    
+   
     @PostMapping
     public ResponseEntity<String> pay(@RequestBody PaymentCommand command) {
         producer.send(command);
