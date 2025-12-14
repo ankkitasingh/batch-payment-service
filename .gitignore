@@ -1,33 +1,47 @@
-HELP.md
+# ======================
+# OS files
+# ======================
+.DS_Store
+
+# ======================
+# Java / Maven
+# ======================
 target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+*.log
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# ======================
+# Kafka / TLS / Secrets
+# ======================
+*.pem
+*.key
+*.cert
+*.p12
+*.jks
+*.b64
+*.oneline
+*.env
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+# ======================
+# IDEs
+# ======================
+.idea/
 .vscode/
+*.iml
+
+# ======================
+# Maven wrapper (optional cache)
+# ======================
+.mvn/wrapper/maven-wrapper.jar
+
+
+# ======================
+# IDE (Eclipse / STS)
+# ======================
+.classpath
+.project
+.settings/
+
+# ======================
+# Spring Initializr
+# ======================
+HELP.md
