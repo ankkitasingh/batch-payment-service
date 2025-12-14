@@ -3,26 +3,62 @@ kind: Deployment
 metadata:
   name: batch-kafka-service
   namespace: ${ENV}
+
 spec:
   replicas: ${REPLICAS}
+
   selector:
     matchLabels:
       app: batch-kafka-service
+
   template:
     metadata:
       labels:
         app: batch-kafka-service
+
     spec:
-      containers:
-        - name: batch-kafka-service
+      #################################################
+      # Shared volume for Kafka certs
+      #################################################
+      volumes:
+        - name: kafka-certs
+          emptyDir: {}
+
+      #################################################
+      # Init container: generate Kafka certs FIRST
+      #################################################
+      initContainers:
+        - name: init-kafka-certs
           image: ${IMAGE_URI}
-          ports:
-            - containerPort: 8080
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: ${ENV}
-            - name: KAFKA_BOOTSTRAP_SERVERS
-              value: ${KAFKA_BOOTSTRAP_SERVERS}
+          command: ["/bin/sh", "-c", "/init-kafka-certs.sh"]
           envFrom:
             - secretRef:
                 name: kafka-certs
+          volumeMounts:
+            - name: kafka-certs
+              mountPath: /tmp/kafka-certs
+
+      #################################################
+      # Main application container
+      #################################################
+      containers:
+        - name: batch-kafka-service
+          image: ${IMAGE_URI}
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: ${ENV}
+
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: ${KAFKA_BOOTSTRAP_SERVERS}
+
+          envFrom:
+            - secretRef:
+                name: kafka-certs
+
+          volumeMounts:
+            - name: kafka-certs
+              mountPath: /tmp/kafka-certs
