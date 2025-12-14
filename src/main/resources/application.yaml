@@ -7,9 +7,9 @@ spring:
 
     properties:
       security.protocol: SSL
-      ssl.truststore.location: file:/tmp/kafka-certs/truststore.jks
+      ssl.truststore.location: /tmp/kafka-certs/truststore.jks
       ssl.truststore.password: ${KAFKA_TRUSTSTORE_PASSWORD}
-      ssl.keystore.location: file:/tmp/kafka-certs/keystore.p12
+      ssl.keystore.location: /tmp/kafka-certs/keystore.p12
       ssl.keystore.password: ${KAFKA_KEYSTORE_PASSWORD}
       ssl.keystore.type: PKCS12
       ssl.key.password: ${KAFKA_KEYSTORE_PASSWORD}
