@@ -68,7 +68,7 @@ jobs:
       - name: Set env values
         run: |
           if [ "$ENV" = "dev" ]; then
-            echo "REPLICAS=1" >> $GITHUB_ENV
+            echo "REPLICAS=2" >> $GITHUB_ENV
             echo "KAFKA_BOOTSTRAP_SERVERS=a-pring-kafka-ankkitasingh32-739e.c.aivencloud.com:21451" >> $GITHUB_ENV
           elif [ "$ENV" = "uat" ]; then
             echo "REPLICAS=2" >> $GITHUB_ENV
