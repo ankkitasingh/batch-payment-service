@@ -1,5 +1,5 @@
 #!/bin/sh
-set -euo pipefail
+set -e
 
 CERT_DIR=/tmp/kafka-certs
 mkdir -p "$CERT_DIR"
