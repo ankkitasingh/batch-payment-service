@@ -46,3 +46,9 @@ spring:
     listener:
       type: batch
       ack-mode: manual
+
+logging:
+  level:
+    org.springframework.kafka: DEBUG
+    org.apache.kafka: INFO
+    com.spring.batch.kafka: DEBUG
