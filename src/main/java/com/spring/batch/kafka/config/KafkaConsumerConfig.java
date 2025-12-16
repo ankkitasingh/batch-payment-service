@@ -13,39 +13,38 @@ import org.springframework.util.backoff.FixedBackOff;
 
 import com.spring.batch.kafka.exception.NonRetryablePaymentException;
 import com.spring.batch.kafka.model.PaymentCommand;
+import org.springframework.kafka.listener.ContainerProperties;
+
 
 @Configuration
 public class KafkaConsumerConfig {
 	
 	@Bean
-    ConcurrentKafkaListenerContainerFactory<String, PaymentCommand>
-    batchFactory(ConsumerFactory<String, PaymentCommand> cf,
-    		 ProducerFactory<String, Object> producerFactory,
-                 KafkaTemplate<String, Object> template) {
+	ConcurrentKafkaListenerContainerFactory<String, PaymentCommand> batchFactory(
+	        ConsumerFactory<String, PaymentCommand> cf,
+	        KafkaTemplate<String, Object> template) {
 
-        var factory = new ConcurrentKafkaListenerContainerFactory<String, PaymentCommand>();
-        factory.setConsumerFactory(cf);
-        factory.setBatchListener(true);
-        
-        
-        DefaultErrorHandler errorHandler =
-        	    new DefaultErrorHandler(
-        	        new DeadLetterPublishingRecoverer(template),
-        	        new FixedBackOff(2000, 3)
-        	    );
+	    ConcurrentKafkaListenerContainerFactory<String, PaymentCommand> factory =
+	            new ConcurrentKafkaListenerContainerFactory<>();
 
-		errorHandler.addNotRetryableExceptions(NonRetryablePaymentException.class);
-	
-		factory.setCommonErrorHandler(errorHandler);
+	    factory.setConsumerFactory(cf);
+	    factory.setBatchListener(true);
 
-       /* factory.setCommonErrorHandler(
-            new DefaultErrorHandler(
-                new DeadLetterPublishingRecoverer(template),
-                new FixedBackOff(2000, 3)
-            )
-        );*/
+	    // ✅ THIS IS THE MISSING LINE
+	    factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
 
-        return factory;
-    }
+	    DefaultErrorHandler errorHandler =
+	            new DefaultErrorHandler(
+	                    new DeadLetterPublishingRecoverer(template),
+	                    new FixedBackOff(2000, 3)
+	            );
+
+	    errorHandler.addNotRetryableExceptions(NonRetryablePaymentException.class);
+
+	    factory.setCommonErrorHandler(errorHandler);
+
+	    return factory;
+	}
+
 
 }
