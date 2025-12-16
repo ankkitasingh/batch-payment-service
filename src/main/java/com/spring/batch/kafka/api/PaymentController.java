@@ -27,7 +27,7 @@ public class PaymentController {
    
     @PostMapping
     public ResponseEntity<String> pay(@RequestBody PaymentCommand command) {
-    	
+    
     	 Payments payment = new Payments();
          payment.setPaymentId(command.paymentId());
          payment.setAccountId(command.accountId());
