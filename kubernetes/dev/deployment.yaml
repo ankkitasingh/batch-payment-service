@@ -55,9 +55,14 @@ spec:
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: ${KAFKA_BOOTSTRAP_SERVERS}
 
+          #################################################
+          # Secrets injected as environment variables
+          #################################################
           envFrom:
             - secretRef:
                 name: kafka-certs
+            - secretRef:
+                name: payment-db-secret
 
           volumeMounts:
             - name: kafka-certs

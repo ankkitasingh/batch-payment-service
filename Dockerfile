@@ -22,7 +22,7 @@ WORKDIR /app
 COPY init-kafka-certs.sh /init-kafka-certs.sh
 RUN chmod +x /init-kafka-certs.sh
 
-# ✅ FIX: copy JAR from build stage
+
 COPY --from=build /build/target/*.jar app.jar
 
 ENTRYPOINT ["java","-jar","app.jar"]
